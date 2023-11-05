@@ -5,7 +5,7 @@ export class PaginationDto {
   @IsNotEmpty()
   @Transform(({ value }) => parseInt(value, 10))
   @IsInt({ message: 'page must be an intenger number' })
-  @IsPositive({ message: 'perPage must be a positive integer number' })
+  @IsPositive({ message: 'page must be a positive integer number' })
   page: number;
 
   @IsNotEmpty()

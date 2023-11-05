@@ -19,12 +19,35 @@ import { User } from '@prisma/client';
 import { CreateProduct } from './dto';
 import { ProductsService } from './products.service';
 import { PaginationDto } from 'src/global-dto';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Products')
 @UseGuards(JWTGuard)
 @Controller('products')
+@ApiHeader({
+  name: 'Authorization',
+  description: 'JWT token',
+  required: true,
+})
 export class ProductsController {
   constructor(private productService: ProductsService) {}
 
+  @ApiOperation({ summary: 'Create product' })
+  @ApiResponse({
+    status: 409,
+    description: 'if product with same userId and name already exist',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'if product is created successefully',
+  })
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async createProduct(@GetUser() user: User, @Body() dto: CreateProduct) {
@@ -32,6 +55,16 @@ export class ProductsController {
     return createdProduct;
   }
 
+  @ApiOperation({ summary: 'Get list products with pagination' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'page or perPage is less then or equal to 0. Both values must be greated then 0 and an intenger',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of products in JSON format',
+  })
   @HttpCode(HttpStatus.OK)
   @Get()
   async getProductsWithPagination(
@@ -45,6 +78,15 @@ export class ProductsController {
     return lsitOfPorducts;
   }
 
+  @ApiOperation({ summary: 'Get product details by ID' })
+  @ApiResponse({
+    status: 404,
+    description: 'if product is not found',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product details',
+  })
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async getProductById(@Param('id', ParseIntPipe) id: number) {
@@ -55,6 +97,15 @@ export class ProductsController {
     return product;
   }
 
+  @ApiOperation({ summary: 'Delete product details by ID' })
+  @ApiResponse({
+    status: 404,
+    description: 'if product is not found',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Details of deleted product',
+  })
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
   async deleteProductById(
